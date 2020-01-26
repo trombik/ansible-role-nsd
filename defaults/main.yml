@@ -1,13 +1,17 @@
 ---
 
-template_role_package: "{{ __template_role_package }}"
-template_role_service: "{{ __template_role_service }}"
-template_role_extra_packages: []
-template_role_user: "{{ __template_role_user }}"
-template_role_group: "{{ __template_role_group }}"
-template_role_extra_groups: []
-template_role_log_dir: /var/log/template_role
-template_role_config_dir: "{{ __template_role_config_dir }}"
-template_role_config_file: "{{ template_role_config_dir }}/sshd_config"
-template_role_config: ""
-template_role_flags: ""
+nsd_package: "{{ __nsd_package }}"
+nsd_service: "{{ __nsd_service }}"
+nsd_extra_packages: []
+nsd_user: "{{ __nsd_user }}"
+nsd_group: "{{ __nsd_group }}"
+nsd_extra_groups: []
+nsd_config_dir: "{{ __nsd_config_dir }}"
+nsd_config_file: "{{ nsd_config_dir }}/nsd.conf"
+nsd_config: ""
+nsd_flags: ""
+nsd_zones: []
+nsd_zonesdir: "{{ __nsd_zonesdir }}"
+nsd_pid_dir: "{{ __nsd_pid_dir }}"
+nsd_pid_file: "{{ nsd_pid_dir }}/nsd.pid"
+nsd_include_x509_certificate: no
