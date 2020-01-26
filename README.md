@@ -1,6 +1,6 @@
 # `trombik.nsd`
 
-[![Build Status](https://travis-ci.com/trombik/trombik.nsd.svg?branch=master)](https://travis-ci.com/trombik/trombik.nsd)
+[![Build Status](https://travis-ci.com/trombik/ansible-role-nsd.svg?branch=master)](https://travis-ci.com/trombik/ansible-role-nsd)
 
 `ansible` role for `nsd`.
 
