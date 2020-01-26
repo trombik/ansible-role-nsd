@@ -1,6 +1,6 @@
 ---
 
-- name: Restart template_role_service
+- name: Restart nsd_service
   service:
-    name: "{{ template_role_service }}"
+    name: "{{ nsd_service }}"
     state: restarted

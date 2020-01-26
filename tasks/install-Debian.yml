@@ -1,27 +1,34 @@
 ---
 
-- name: Install template_role_extra_packages
+- name: Install nsd_extra_packages
   apt:
-    name: "{{ template_role_extra_packages }}"
+    name: "{{ nsd_extra_packages }}"
     state: present
 
-- name: Install template_role_package
+- name: Install nsd_package
   apt:
-    name: "{{ template_role_package }}"
+    name: "{{ nsd_package }}"
     state: present
 
-- name: Enable template_role_service
+- name: Enable nsd_service
   service:
-    name: "{{ template_role_service }}"
+    name: "{{ nsd_service }}"
     enabled: yes
 
-- name: "Create /etc/default/{{ template_role_service }}"
+- name: Stop systemd-resolved
+  service:
+    name: systemd-resolved
+    enabled: false
+    state: stopped
+
+- name: "Create /etc/default/{{ nsd_service }}"
+  # XXX the systemd unit file does not read this
   template:
     src: Debian.default.j2
-    dest: "/etc/default/{{ template_role_service }}"
+    dest: "/etc/default/{{ nsd_service }}"
     mode: 0644
     # keep the original copy in case you need the defaults in it
     backup: yes
     validate: sh -n %s
   notify:
-    - Restart template_role_service
+    - Restart nsd_service

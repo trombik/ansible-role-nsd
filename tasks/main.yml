@@ -6,34 +6,58 @@
 - name: "Include install-{{ ansible_os_family }}.yml"
   include: "install-{{ ansible_os_family }}.yml"
 
-- name: "Create {{ template_role_config_dir }}"
+- name: "Create {{ nsd_config_dir }}"
   file:
-    path: "{{ template_role_config_dir }}"
+    path: "{{ nsd_config_dir }}"
     state: directory
 
-- name: "Create {{ template_role_config_file }}"
-  template:
-    src: template_role.conf.j2
-    dest: "{{ template_role_config_file }}"
-  notify:
-    - Restart template_role_service
+- name: Include x509_certificate
+  include_role:
+    name: trombik.x509_certificate
+  when:
+    - nsd_include_x509_certificate
 
-- name: "Add template_role_user to template_role_extra_groups"
+- name: Create nsd_zones files
+  template:
+    dest: "{{ nsd_config_dir }}/{{ item.name }}"
+    src: zone.j2
+    group: "{{ nsd_group }}"
+    mode: 0640
+  with_items: "{{ nsd_zones }}"
+  when:
+    - (not 'state' in item ) or (item.state == 'present')
+  notify:
+    - Restart nsd_service
+
+- name: Delete nsd_zones files
+  file:
+    path: "{{ nsd_config_dir }}/{{ item.name }}"
+    state: absent
+  with_items: "{{ nsd_zones }}"
+  when:
+    - "'state' in item"
+    - "item.state == 'absent'"
+  notify:
+    - Restart nsd_service
+
+- name: "Create {{ nsd_config_file }}"
+  template:
+    src: nsd.conf.j2
+    dest: "{{ nsd_config_file }}"
+    mode: 0640
+    group: "{{ nsd_group }}"
+    validate: nsd-checkconf -v %s
+  notify:
+    - Restart nsd_service
+
+- name: "Add nsd_user to nsd_extra_groups"
   user:
-    name: "{{ template_role_user }}"
+    name: "{{ nsd_user }}"
     append: yes
     create_home: no
-    groups: "{{ template_role_extra_groups }}"
+    groups: "{{ nsd_extra_groups }}"
 
-- name: Create template_role_log_dir
-  file:
-    path: "{{ template_role_log_dir }}"
-    owner: "{{ template_role_user }}"
-    group: "{{ template_role_group }}"
-    mode: 0755
-    state: directory
-
-- name: Start template_role_service
+- name: Start nsd_service
   service:
-    name: "{{ template_role_service }}"
+    name: "{{ nsd_service }}"
     state: started

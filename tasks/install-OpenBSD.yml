@@ -1,19 +1,19 @@
 ---
 
-- name: Install template_role_extra_packages
+- name: Install nsd_extra_packages
   openbsd_pkg:
-    name: "{{ template_role_extra_packages }}"
+    name: "{{ nsd_extra_packages }}"
     state: present
 
-# - name: Install template_role_package
+# - name: Install nsd_package
 #   openbsd_pkg:
-#     name: "{{ template_role_package }}"
+#     name: "{{ nsd_package }}"
 #     state: present
 
-- name: Enable template_role_service
+- name: Enable nsd_service
   service:
-    name: "{{ template_role_service }}"
-    arguments: "{{ template_role_flags }}"
+    name: "{{ nsd_service }}"
+    arguments: "{{ nsd_flags }}"
     enabled: yes
   notify:
-    - Restart template_role_service
+    - Restart nsd_service
