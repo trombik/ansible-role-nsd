@@ -2,9 +2,5 @@
 
 ### Description
 
-This scenario creates two `virtualbox` instances.
-
-The scenario has a side-effect play that does the followings:
-
-* Creates two digests from the time
-* Creates two files with the digests under `/tmp`
+This scenario creates two `virtualbox` instances, one as a master, and another
+as a slave. They runs `nsd`.

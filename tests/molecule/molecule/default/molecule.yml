@@ -15,16 +15,16 @@ lint:
   name: yamllint
 
 platforms:
-  - name: server1
+  - name: master1
     box: trombik/ansible-freebsd-12.0-amd64
     interfaces:
       - network_name: private_network
         ip: 192.168.21.200
-  - name: client1
-    box: trombik/ansible-freebsd-12.0-amd64
+  - name: slave1
+    box: trombik/ansible-openbsd-6.5-amd64
     interfaces:
       - network_name: private_network
-        ip: 192.168.21.100
+        ip: 192.168.21.201
 
 provisioner:
   name: ansible
@@ -42,7 +42,6 @@ provisioner:
     name: ansible-lint
   playbooks:
     converge: playbook.yml
-    side_effect: side_effect.yml
   inventory:
     links:
       hosts: inventory/default

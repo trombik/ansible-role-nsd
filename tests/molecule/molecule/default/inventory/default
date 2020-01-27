@@ -1,9 +1,9 @@
-[server]
-server1
+[master]
+master1
 
-[client]
-client1
+[slave]
+slave1
 
 [all:children]
-server
-client
+master
+slave
