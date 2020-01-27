@@ -1,0 +1,9 @@
+---
+project_zones: |
+  zone:
+    name: "trombik.org"
+    zonefile: "{{ nsd_zonesdir }}/trombik.org.zone"
+    allow-notify: 192.168.21.200 NOKEY
+    request-xfr: 192.168.21.200 NOKEY
+
+project_nsd_zones: []

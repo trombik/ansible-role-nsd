@@ -1,2 +1,3 @@
 ---
-[]
+- name: trombik.redhat_repo
+- name: trombik.x509_certificate
