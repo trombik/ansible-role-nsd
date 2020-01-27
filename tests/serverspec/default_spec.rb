@@ -10,7 +10,7 @@ group = "nsd"
 default_user = "root"
 default_group = "wheel"
 ports = [53]
-extra_groups = %w[]
+extra_groups = %w[bin]
 extra_packages = []
 db_dir = ""
 

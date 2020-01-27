@@ -29,7 +29,6 @@
       RedHat: ""
     nsd_flags: "{{ os_nsd_flags[ansible_os_family] }}"
 
-
     nsd_zones:
       - name: trombik.org.zone
         config: |
@@ -48,7 +47,7 @@
       OpenBSD: []
       RedHat: ["bind-utils"]
     nsd_extra_packages: "{{ os_nsd_extra_packages[ansible_os_family] }}"
-    nsd_extra_groups: []
+    nsd_extra_groups: ["bin"]
     nsd_config: |
       server:
         server-count: 1
@@ -75,6 +74,11 @@
         zonefile: "{{ nsd_config_dir }}/trombik.org.zone"
         provide-xfr: 127.0.0.1 NOKEY
         provide-xfr: 192.168.1.1 NOKEY
+      zone:
+        name: "example.org"
+        zonefile: "{{ nsd_zonesdir }}/example.org.zone"
+        allow-notify: 172.16.200.200 NOKEY
+        request-xfr: 172.16.200.200 NOKEY
 
     redhat_repo_extra_packages:
       - epel-release
