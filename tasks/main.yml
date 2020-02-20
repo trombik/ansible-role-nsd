@@ -17,7 +17,7 @@
   when:
     - nsd_include_x509_certificate
 
-- name: Create nsd_zones files
+- name: Create nsd_zones files (raw config)
   template:
     dest: "{{ nsd_config_dir }}/{{ item.name }}"
     src: zone.j2
@@ -26,6 +26,21 @@
   with_items: "{{ nsd_zones }}"
   when:
     - (not 'state' in item ) or (item.state == 'present')
+    - "'config' in item"
+    - item.config | length > 0
+  notify:
+    - Restart nsd_service
+
+- name: Create nsd_zones files (template-based)
+  template:
+    dest: "{{ nsd_config_dir }}/{{ item.name }}"
+    src: config_yaml.j2
+    group: "{{ nsd_group }}"
+    mode: 0640
+  with_items: "{{ nsd_zones }}"
+  when:
+    - (not 'state' in item ) or (item.state == 'present')
+    - "'yaml' in item"
   notify:
     - Restart nsd_service
 
