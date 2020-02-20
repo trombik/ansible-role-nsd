@@ -1,109 +1,3 @@
-# `trombik.nsd`
-
-[![Build Status](https://travis-ci.com/trombik/ansible-role-nsd.svg?branch=master)](https://travis-ci.com/trombik/ansible-role-nsd)
-
-`ansible` role for `nsd`.
-
-# Requirements
-
-# Role Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `nsd_package` | Package name of `nsd` | `{{ __nsd_package }}` |
-| `nsd_service` | Service name of `nsd` | `{{ __nsd_service }}` |
-| `nsd_extra_packages` | A list of extra packages to install | `[]` |
-| `nsd_user` | User name of `nsd` | `{{ __nsd_user }}` |
-| `nsd_group` | Group name of `nsd` | `{{ __nsd_group }}` |
-| `nsd_extra_groups` | A list of extra groups for `nsd` user | `[]` |
-| `nsd_config_dir` | Path to the configuration directory | `{{ __nsd_config_dir }}` |
-| `nsd_config_file` | Path to `nsd.conf` | `{{ nsd_config_dir }}/nsd.conf` |
-| `nsd_config` | The content of `nsd.conf` | `""` |
-| `nsd_flags` | See below | `""` |
-| `nsd_zones` | See below | `[]` |
-| `nsd_zonesdir` | | `{{ __nsd_zonesdir }}` |
-| `nsd_pid_dir` | Path to PID directory | `{{ __nsd_pid_dir }}` |
-| `nsd_pid_file` | Path to PID file | `{{ nsd_pid_dir }}/nsd.pid` |
-| `nsd_include_x509_certificate` | See below | `false` |
-
-## `nsd_flags`
-
-This variable is used for overriding defaults for startup scripts. In Debian
-variants, the value is the content of `/etc/default/nsd`. In RedHat
-variants, it is the content of `/etc/sysconfig/nsd`. In FreeBSD, it
-is the content of `/etc/rc.conf.d/nsd`. In OpenBSD, the value is
-passed to `rcctl set nsd`.
-
-Note that the file is not always be used. Some distributions ignore the file.
-
-## `nsd_include_x509_certificate`
-
-When true, include
-[`trombik.x509_certificate`](https://github.com/trombik/ansible-role-x509_certificate)
-during the play, which can be used to install X509 certificates.
-
-## `nsd_zones`
-
-| Key | Description | Mandatory? |
-|-----|-------------|------------|
-| `name` | File name of the zone file (file name only) | yes |
-| `config` | Content of the zone file | no |
-| `state` | Either `present` or `absent` | no |
-| `yaml` | Use `templates/config_yaml.j2` as template (experimental) | no |
-
-## Debian
-
-| Variable | Default |
-|----------|---------|
-| `__nsd_service` | `nsd` |
-| `__nsd_package` | `nsd` |
-| `__nsd_config_dir` | `/etc/nsd` |
-| `__nsd_user` | `nsd` |
-| `__nsd_group` | `nsd` |
-| `__nsd_pid_dir` | `/run/nsd` |
-| `__nsd_zonesdir` | `/var/lib/nsd` |
-
-## FreeBSD
-
-| Variable | Default |
-|----------|---------|
-| `__nsd_service` | `nsd` |
-| `__nsd_package` | `dns/nsd` |
-| `__nsd_config_dir` | `/usr/local/etc/nsd` |
-| `__nsd_user` | `nsd` |
-| `__nsd_group` | `nsd` |
-| `__nsd_pid_dir` | `/var/run/nsd` |
-| `__nsd_zonesdir` | `/var/db/nsd` |
-
-## OpenBSD
-
-| Variable | Default |
-|----------|---------|
-| `__nsd_service` | `nsd` |
-| `__nsd_package` | `false` |
-| `__nsd_config_dir` | `/var/nsd/etc` |
-| `__nsd_user` | `_nsd` |
-| `__nsd_group` | `_nsd` |
-| `__nsd_pid_dir` | `/var/nsd/run` |
-| `__nsd_zonesdir` | `/var/nsd/zones` |
-
-## RedHat
-
-| Variable | Default |
-|----------|---------|
-| `__nsd_service` | `nsd` |
-| `__nsd_package` | `nsd` |
-| `__nsd_config_dir` | `/etc/nsd` |
-| `__nsd_user` | `nsd` |
-| `__nsd_group` | `nsd` |
-| `__nsd_pid_dir` | `/run/nsd` |
-| `__nsd_zonesdir` | `/var/lib/nsd` |
-
-# Dependencies
-
-# Example Playbook
-
-```yaml
 ---
 - hosts: localhost
   roles:
@@ -135,26 +29,68 @@ during the play, which can be used to install X509 certificates.
       RedHat: ""
     nsd_flags: "{{ os_nsd_flags[ansible_os_family] }}"
 
-
     nsd_zones:
       - name: trombik.org.zone
-        config: |
-          $TTL 86400
-          trombik.org. IN SOA a.ns.trombik.org. hostmaster.trombik.org. 2013020201 10800 3600 604800 3600
-          trombik.org. IN NS a.ns
-          trombik.org. IN NS b.ns
-          ;;
-          a.ns  IN A 192.168.1.1
-          b.ns  IN A 192.168.1.2
-          www   IN A 192.168.1.3
-          mail  IN A 192.168.1.5
+        yaml:
+          domain: trombik.org
+          ttl: 86400
+          soa:
+            ttl: 86400
+            mname: a.ns.trombik.org
+            rname: hostmaster.trombik.org
+            serial: 2013020201
+            refresh: 10800
+            retry: 3600
+            expire: 604800
+            negative_cache_ttl: 3600
+          ns:
+            - name: a.ns
+              addresses:
+                - 192.168.1.1
+              ttl: 864000
+            - name: b.ns
+              addresses:
+                - 192.168.1.2
+              ttl: 864000
+          a:
+            - name: www
+              addresses:
+                - 192.168.1.3
+                - 192.168.1.4
+            - name: mail
+              addresses:
+                - 192.168.1.5
+            - name: canonical
+              addresses:
+                - 192.168.1.6
+          mx:
+            - name: trombik.org
+              host: mail.trombik.org
+              prio: 50
+            - name: trombik.org
+              host: external.example.org
+              prio: 200
+          cname:
+            - name: alias
+              addresses:
+                - canonical
+          txt:
+            - name: "@"
+              addresses:
+                - foo
+                - bar
+            - name: txt
+              addresses:
+                - buz
+          post_config: |
+            foobarbuz IN A 192.168.255.255
     os_nsd_extra_packages:
       FreeBSD: []
       Debian: ["dnsutils"]
       OpenBSD: []
       RedHat: ["bind-utils"]
     nsd_extra_packages: "{{ os_nsd_extra_packages[ansible_os_family] }}"
-    nsd_extra_groups: []
+    nsd_extra_groups: ["bin"]
     nsd_config: |
       server:
         server-count: 1
@@ -181,6 +117,11 @@ during the play, which can be used to install X509 certificates.
         zonefile: "{{ nsd_config_dir }}/trombik.org.zone"
         provide-xfr: 127.0.0.1 NOKEY
         provide-xfr: 192.168.1.1 NOKEY
+      zone:
+        name: "example.org"
+        zonefile: "{{ nsd_zonesdir }}/example.org.zone"
+        allow-notify: 172.16.200.200 NOKEY
+        request-xfr: 172.16.200.200 NOKEY
 
     redhat_repo_extra_packages:
       - epel-release
@@ -343,26 +284,3 @@ during the play, which can be used to install X509 certificates.
             uKo5LvWdgHgmn/r/SrFomUgg1eNliTyNF/5wvBRxPSTcrDXhfmFLwKOrW404wIG0
             LVeiZ2BZ9wcrvkS1s2/uSWM1u5Y=
             -----END CERTIFICATE-----
-```
-
-# License
-
-```
-Copyright (c) 2020 Tomoyuki Sakurai <y@trombik.org>
-
-Permission to use, copy, modify, and distribute this software for any
-purpose with or without fee is hereby granted, provided that the above
-copyright notice and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-```
-
-# Author Information
-
-Tomoyuki Sakurai <y@trombik.org>

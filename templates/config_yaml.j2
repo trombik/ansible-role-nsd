@@ -1,0 +1,46 @@
+;; Managed by ansible
+
+{% set domain = item.yaml.domain %}
+{% set soa = item.yaml.soa %}
+$TTL {{ item.ttl | default(86400) }}
+{{ domain }}. {{ soa.ttl | default('') }} IN SOA {{ soa.mname }}. {{ soa.rname }}. {{ soa.serial }} {{ soa.refresh | default(10800) }} {{ soa.retry | default(3600) }} {{ soa.expire | default(604800) }} {{ soa.negative_cache_ttl | default(3600) }}
+; trombik.org.  IN SOA a.ns.trombik.org. hostmaster.trombik.org. 2013020201 10800 3600 604800 3600
+{% for ns in item.yaml.ns | default([]) %}
+{{ domain }}. {{ ns.ttl | default('') }} IN NS {{ ns.name }}
+{% endfor %}
+
+;; NS
+{% for ns in item.yaml.ns | default([]) %}
+{% for addr in ns.addresses | default([]) %}
+{{ ns.name }} {{ ns.ttl | default('') }} IN A {{ addr }}
+{% endfor %}
+{% endfor %}
+
+;; MX
+{% for mx in item.yaml.mx | default([]) %}
+{{ mx.name }}. {{ mx.ttl | default('') }} IN MX {{ mx.prio | default(100) }} {{ mx.host }}.
+{% endfor %}
+
+;; A
+{% for a in item.yaml.a | default([]) %}
+{% for address in a.addresses %}
+{{ a.name }} {{   a.ttl | default('') }} IN A {{ address }}
+{% endfor %}
+{% endfor %}
+
+;; CNAME
+{% for cname in item.yaml.cname | default([]) %}
+{% for canonical in cname.addresses | default([]) %}
+{{ cname.name }} {{ cname.ttl | default('') }} CNAME {{ canonical }}
+{% endfor %}
+{% endfor %}
+
+;; TXT
+{% for txt in item.yaml.txt | default([]) %}
+{% for address in txt.addresses %}
+{{ txt.name }} {{ txt.ttl | default('') }} IN TXT "{{ address }}"
+{% endfor %}
+{% endfor %}
+
+;; post_config
+{{ item.yaml.post_config | default() }}
